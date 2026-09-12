@@ -1,16 +1,13 @@
 Random Joke Generator
 
-This directory adds a simple random joke generator to the repository. There are two implementations included:
+This directory adds a simple random joke generator to the repository. The React component now supports selecting categories and a safe-mode filter using JokeAPI (https://v2.jokeapi.dev/).
 
-1) Standalone static page (public/joke.html)
-   - Opens in the browser as a plain HTML page. It uses https://icanhazdadjoke.com/ to fetch jokes (no API key required).
-   - Open https://your-repo.github.io/ai-style-twin/joke.html (if hosted) or open the file locally to try it.
+Features added:
+- Category selection: Any, Programming, Misc, Dark, Pun, Spooky, Christmas
+- Safe mode toggle: filters NSFW / religious / political / racist / sexist / explicit content
+- Support for single- and two-part jokes (setup + delivery)
 
-2) React component (src/components/JokeGenerator.jsx)
-   - A lightweight React component that fetches jokes from the Official Joke API: https://official-joke-api.appspot.com/random_joke
-   - Drop this component into a React or Next.js page to use it.
-
-How to use the React component (example):
+Usage (React):
 
 import JokeGenerator from './components/JokeGenerator'
 
@@ -23,5 +20,5 @@ export default function Page() {
 }
 
 Notes:
-- Both external APIs used here are free and do not require API keys for basic usage. They are suitable for development and demos.
-- If you plan to request many jokes or use this in production, consider adding caching or an API proxy to avoid CORS/rate limits.
+- The component uses the public JokeAPI (no API key required). In production, consider adding a server-side proxy or caching layer to avoid rate limits and to centralize content filtering.
+- If you prefer a different set of categories, edit the CATEGORIES array in the component.

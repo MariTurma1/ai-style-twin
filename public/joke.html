@@ -12,11 +12,34 @@
     button { margin-top:16px; padding:10px 16px; border-radius:8px; border:0; background:#2563eb; color:white; cursor:pointer }
     button:active { transform:translateY(1px) }
     .meta { color:#6b7280; font-size:0.9rem; margin-top:8px }
+    label { font-size:0.95rem }
+    select, input[type="checkbox"] { margin-left:8px }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Random Joke Generator</h1>
+
+    <div style="display:flex; gap:12px; justify-content:center; align-items:center; margin-bottom:12px;">
+      <label>
+        Category:
+        <select id="category">
+          <option>Any</option>
+          <option>Programming</option>
+          <option>Misc</option>
+          <option>Dark</option>
+          <option>Pun</option>
+          <option>Spooky</option>
+          <option>Christmas</option>
+        </select>
+      </label>
+
+      <label>
+        Safe mode
+        <input type="checkbox" id="safe" checked />
+      </label>
+    </div>
+
     <p id="joke">Click the button to fetch a random joke.</p>
     <div class="meta" id="meta"></div>
     <div>
@@ -26,25 +49,38 @@
   </div>
 
   <script>
-    // Uses icanhazdadjoke (simple, no API key)
+    // Uses JokeAPI (https://v2.jokeapi.dev/) — supports categories and blacklist flags
     const jokeEl = document.getElementById('joke')
     const metaEl = document.getElementById('meta')
     const newBtn = document.getElementById('new')
     const copyBtn = document.getElementById('copy')
+    const categoryEl = document.getElementById('category')
+    const safeEl = document.getElementById('safe')
+
+    const BLACKLIST = ['nsfw','religious','political','racist','sexist','explicit']
 
     async function fetchJoke() {
       jokeEl.textContent = 'Loading...'
       metaEl.textContent = ''
       try {
-        const res = await fetch('https://icanhazdadjoke.com/', {
-          headers: { Accept: 'application/json' }
-        })
+        const cat = categoryEl.value === 'Any' ? 'Any' : encodeURIComponent(categoryEl.value)
+        const blacklist = safeEl.checked ? `&blacklistFlags=${BLACKLIST.join(',')}` : ''
+        const url = `https://v2.jokeapi.dev/joke/${cat}?type=single,twopart${blacklist}`
+
+        const res = await fetch(url)
         if (!res.ok) throw new Error(res.status)
         const data = await res.json()
-        jokeEl.textContent = data.joke
-        metaEl.textContent = `Source: icanhazdadjoke.com | id: ${data.id}`
+        if (data.error) throw new Error(data.message || 'JokeAPI error')
+
+        let text = ''
+        if (data.type === 'single') text = data.joke
+        else if (data.type === 'twopart') text = data.setup + '\n' + data.delivery
+        else text = JSON.stringify(data)
+
+        jokeEl.textContent = text
+        metaEl.textContent = `Source: JokeAPI | category: ${data.category}`
       } catch (err) {
-        jokeEl.textContent = 'Could not fetch a joke right now. Try again.'
+        jokeEl.textContent = 'Could not fetch a joke right now. Try a different category or disable safe mode.'
         console.error(err)
       }
     }
